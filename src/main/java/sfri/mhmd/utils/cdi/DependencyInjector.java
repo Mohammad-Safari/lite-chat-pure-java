@@ -2,12 +2,14 @@ package sfri.mhmd.utils.cdi;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import sfri.mhmd.utils.cdi.anno.Inject;
 import sfri.mhmd.utils.cdi.anno.Optional;
 
+@SuppressWarnings("unchecked")
 public class DependencyInjector implements BaseInjector {
     private final Map<Class<?>, Object> dependencies;
 
@@ -66,7 +68,7 @@ public class DependencyInjector implements BaseInjector {
      */
     public <T> void set(Class<T> dependencyType, T implementation, boolean multi) {
         if (!dependencies.containsKey(dependencyType)) {
-            dependencies.put(dependencyType, multi ? new ArrayList(List.of(implementation)) : implementation);
+            dependencies.put(dependencyType, multi ? new ArrayList<T>(List.of(implementation)) : implementation);
             return;
         }
         if (multi && dependencies.get(dependencyType) instanceof List) {
@@ -77,7 +79,7 @@ public class DependencyInjector implements BaseInjector {
     }
 
     /**
-     * register atype with one impl
+     * register a type with one impl
      * 
      * @param <T>
      * @param dependencyType
@@ -85,6 +87,28 @@ public class DependencyInjector implements BaseInjector {
      */
     public <T> void set(Class<T> dependencyType, T implementation) {
         set(dependencyType, implementation, false);
+    }
+
+    /**
+     * register a list of implementations
+     * 
+     * @param <T>
+     * @param dependencyType
+     * @param implementations
+     */
+    public <T> void setAll(Class<T> dependencyType, List<T> implementations) {
+        implementations.forEach(impl -> set(dependencyType, impl, true));
+    }
+
+    /**
+     * register multiple implementations
+     * 
+     * @param <T>
+     * @param dependencyType
+     * @param implementations
+     */
+    public <T> void setAll(Class<T> dependencyType, T... implementations) {
+        Arrays.stream(implementations).forEach(impl -> set(dependencyType, impl, true));
     }
 
     /**

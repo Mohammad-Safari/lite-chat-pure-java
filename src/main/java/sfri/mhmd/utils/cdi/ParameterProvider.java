@@ -11,6 +11,7 @@ public interface ParameterProvider extends BiFunction<Class<?>, Type, Object> {
 
 }
 
+@SuppressWarnings("unchecked")
 class ParameterProviders {
 
     /**
@@ -58,8 +59,11 @@ class ParameterProviders {
         return (Class<?> paramClass, Type paramGenericType) -> {
             Class<T> dependencyClass = determineDependencyClassForField(paramClass, paramGenericType);
             try {
-                var depObject = dependencyInjector.isMulti(dependencyClass) ? dependencyInjector.getAll(dependencyClass)
-                        : dependencyInjector.get(dependencyClass);
+                if (dependencyInjector.isMulti(dependencyClass)) {
+                    dependencyInjector.getAll(dependencyClass);
+                } else {
+                    dependencyInjector.get(dependencyClass);
+                }
             } catch (Exception e) {
                 T constructDeep = dependencyConstructor.constructDeep(dependencyClass);
                 dependencyInjector.set(dependencyClass, constructDeep, !dependencyClass.equals(paramClass));

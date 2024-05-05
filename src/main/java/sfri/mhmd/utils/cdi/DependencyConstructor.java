@@ -8,6 +8,7 @@ import java.util.List;
 import sfri.mhmd.utils.cdi.anno.Inject;
 import sfri.mhmd.utils.cdi.anno.Optional;
 
+@SuppressWarnings("unchecked")
 public class DependencyConstructor implements BaseConstructor {
     private final BaseInjector dependencyInjector;
 

@@ -18,14 +18,14 @@ public class ContextProvider {
 
     public void removeContext(Context context) {
         contextDependencies.remove(context);
-        
+
     }
 
-    public void clearContext() {
+    public void clearAllContexts() {
         contextDependencies.clear();
     }
 
-    public BaseInjector getContextDependencyInjector(Context context){
+    public BaseInjector getContextDependencyInjector(Context context) {
         if (!contextDependencies.containsKey(context)) {
             throw new IllegalStateException("the context does not exists!");
         }
