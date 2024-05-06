@@ -15,19 +15,18 @@ import sfri.mhmd.utils.server.ResourceHandler;
 import sfri.mhmd.utils.server.ServerConfiguration;
 
 public class Application {
-    public final static ContextProvider contextProvider = new ContextProvider(new ConcurrentHashMap<>());
-
     public static void main(String[] args) throws IOException {
         var di = new DependencyInjector(new ConcurrentHashMap<>());
         var dc = new DependencyConstructor(di);
-        contextProvider.addContext(new Context(Thread.currentThread().getName()), di);
+        ContextProvider.setContextProvider(new ContextProvider(new ConcurrentHashMap<>()));
+        ContextProvider.getContextProvider().addContext(new Context(Thread.currentThread().getName()), di);
+
         di.set(ServerConfiguration.class, new ServerConfiguration("/", new InetSocketAddress(8080)));
         di.setAll(LiteChatHandler.class, List.<LiteChatHandler>of(
                 (x) -> {
                     var body = "Hello World".getBytes();
                     x.sendResponseHeaders(200, body.length);
                     x.getResponseBody().write(body);
-                    x.close();
                 }, new ResourceHandler(".*")));
 
         startApp(di, dc);
@@ -47,7 +46,7 @@ public class Application {
         try {
             thread.join();
         } catch (InterruptedException e) {
-            contextProvider.clearAllContexts();
+            ContextProvider.getContextProvider().clearAllContexts();
             di.get(LiteChatHttpServer.class).stop();
         }
     }

@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class ResourceHandler implements LiteChatHandler {
-
     private final String path;
 
     @Override

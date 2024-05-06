@@ -13,7 +13,6 @@ public interface ParameterProvider extends BiFunction<Class<?>, Type, Object> {
 
 @SuppressWarnings("unchecked")
 class ParameterProviders {
-
     /**
      * field Type is strictly the class field type which could be actually an array,
      * collection or the same as dependency Type

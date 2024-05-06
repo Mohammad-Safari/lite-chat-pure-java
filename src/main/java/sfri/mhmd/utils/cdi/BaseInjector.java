@@ -3,7 +3,6 @@ package sfri.mhmd.utils.cdi;
 import java.util.List;
 
 public interface BaseInjector {
-
     public <T> T get(Class<T> dependencyKey);
 
     public <T> List<T> getAll(Class<T> dependencyKey);

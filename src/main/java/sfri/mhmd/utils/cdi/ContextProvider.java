@@ -2,7 +2,13 @@ package sfri.mhmd.utils.cdi;
 
 import java.util.Map;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class ContextProvider {
+    @Getter
+    @Setter
+    private static ContextProvider contextProvider;
     private final Map<Context, BaseInjector> contextDependencies;
 
     public ContextProvider(Map<Context, BaseInjector> contexDependecies) {
