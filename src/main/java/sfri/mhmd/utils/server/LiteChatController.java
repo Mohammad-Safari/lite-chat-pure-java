@@ -2,7 +2,7 @@ package sfri.mhmd.utils.server;
 
 import com.sun.net.httpserver.HttpExchange;
 
-public interface LiteChatHandler {
+public interface LiteChatController {
     public default String getPath() {
         return "/";
     }

@@ -2,28 +2,19 @@ package sfri.mhmd.utils.cdi;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
 import sfri.mhmd.utils.cdi.anno.Inject;
 import sfri.mhmd.utils.cdi.anno.Optional;
 
+@RequiredArgsConstructor
 @SuppressWarnings("unchecked")
 public class DependencyInjector implements BaseInjector {
     private final Map<Class<?>, Object> dependencies;
 
-    public DependencyInjector(Map<Class<?>, Object> dependencies) {
-        this.dependencies = dependencies;
-    }
-
-    /**
-     * get the registered impl for the type
-     * 
-     * @param <T>
-     * @param dependencyType
-     * @return
-     */
+    @Override
     public <T> T get(Class<T> dependencyType) {
         T dependency = (T) dependencies.get(dependencyType);
         if (dependency == null) {
@@ -35,13 +26,7 @@ public class DependencyInjector implements BaseInjector {
         return dependency;
     }
 
-    /**
-     * get all the registered implementations for the type
-     * 
-     * @param <T>
-     * @param dependencyType
-     * @return
-     */
+    @Override
     public <T> List<T> getAll(Class<T> dependencyType) {
         List<T> dependency = (List<T>) dependencies.get(dependencyType);
         if (dependency == null) {
@@ -53,19 +38,13 @@ public class DependencyInjector implements BaseInjector {
         return (List<T>) dependency;
     }
 
+    @Override
     public <T> boolean isMulti(Class<T> dependencyType) {
         Object dependency = dependencies.get(dependencyType);
         return dependency instanceof List ? true : false;
     }
 
-    /**
-     * registers a type with its implementation(s) in DI map
-     * 
-     * @param <T>
-     * @param dependencyType
-     * @param implementation
-     * @param multi
-     */
+    @Override
     public <T> void set(Class<T> dependencyType, T implementation, boolean multi) {
         if (!dependencies.containsKey(dependencyType)) {
             dependencies.put(dependencyType, multi ? new ArrayList<T>(List.of(implementation)) : implementation);
@@ -78,44 +57,17 @@ public class DependencyInjector implements BaseInjector {
         }
     }
 
-    /**
-     * register a type with one impl
-     * 
-     * @param <T>
-     * @param dependencyType
-     * @param implementation
-     */
+    @Override
     public <T> void set(Class<T> dependencyType, T implementation) {
         set(dependencyType, implementation, false);
     }
 
-    /**
-     * register a list of implementations
-     * 
-     * @param <T>
-     * @param dependencyType
-     * @param implementations
-     */
+    @Override
     public <T> void setAll(Class<T> dependencyType, List<T> implementations) {
         implementations.forEach(impl -> set(dependencyType, impl, true));
     }
 
-    /**
-     * register multiple implementations
-     * 
-     * @param <T>
-     * @param dependencyType
-     * @param implementations
-     */
-    public <T> void setAll(Class<T> dependencyType, T... implementations) {
-        Arrays.stream(implementations).forEach(impl -> set(dependencyType, impl, true));
-    }
-
-    /**
-     * inject dependencies inside the preconstructed/defective object
-     * 
-     * @param object
-     */
+    @Override
     public <T> void inject(T object) {
         Class<?> clazz = object.getClass();
         for (Field field : clazz.getDeclaredFields()) {

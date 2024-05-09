@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
 
+/**
+ * Gets method/constructor dependency classes, parameter type,
+ * then provides its value/implmentation
+ */
 public interface ParameterProvider extends BiFunction<Class<?>, Type, Object> {
 
 }

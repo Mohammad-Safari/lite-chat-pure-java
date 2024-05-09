@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class ResourceHandler implements LiteChatHandler {
+public class LiteChatResourceResolver implements LiteChatController {
     private final String path;
 
     @Override
@@ -21,7 +21,7 @@ public class ResourceHandler implements LiteChatHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        Path resourcePath = Path.of("resources", exchange.getRequestURI().toString());
+        var resourcePath = Path.of("resources", exchange.getRequestURI().toString());
         if (Files.exists(resourcePath)) {
             var data = Files.readAllBytes(resourcePath);
             exchange.sendResponseHeaders(200, data.length);

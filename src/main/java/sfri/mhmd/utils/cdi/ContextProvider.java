@@ -3,38 +3,51 @@ package sfri.mhmd.utils.cdi;
 import java.util.Map;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+@RequiredArgsConstructor
 public class ContextProvider {
     @Getter
     @Setter
     private static ContextProvider contextProvider;
-    private final Map<Context, BaseInjector> contextDependencies;
+    private final Map<Context, BaseInjector> contextInjectors;
+    private final Map<Context, BaseConstructor> contextConstructors;
+    @Getter
+    @Setter
+    private BaseInjector rootContextInjector;
+    @Getter
+    @Setter
+    private BaseConstructor rootContextConstructor;
 
-    public ContextProvider(Map<Context, BaseInjector> contexDependecies) {
-        this.contextDependencies = contexDependecies;
-    }
-
-    public void addContext(Context context, BaseInjector di) {
-        if (contextDependencies.containsKey(context)) {
+    public void addContext(Context context, BaseInjector di, BaseConstructor dc) {
+        if (contextInjectors.containsKey(context) || contextConstructors.containsKey(context)) {
             throw new IllegalStateException("this context has been added and still exists!");
         }
-        contextDependencies.put(context, di);
+        contextInjectors.put(context, di);
     }
 
     public void removeContext(Context context) {
-        contextDependencies.remove(context);
-
+        contextInjectors.remove(context);
+        contextConstructors.remove(context);
     }
 
     public void clearAllContexts() {
-        contextDependencies.clear();
+        contextInjectors.clear();
+        contextConstructors.clear();
     }
 
-    public BaseInjector getContextDependencyInjector(Context context) {
-        if (!contextDependencies.containsKey(context)) {
-            throw new IllegalStateException("the context does not exists!");
+    public BaseInjector getContextInjector(Context context) {
+        if (!contextInjectors.containsKey(context)) {
+            throw new IllegalStateException("the context has no injectors!");
         }
-        return contextDependencies.get(context);
+        return contextInjectors.get(context);
+    }
+
+    public BaseConstructor getContextConstrucors(Context context) {
+        if (!contextConstructors.containsKey(context)) {
+            throw new IllegalStateException("the context has no constructors!");
+        }
+        return contextConstructors.get(context);
     }
 }

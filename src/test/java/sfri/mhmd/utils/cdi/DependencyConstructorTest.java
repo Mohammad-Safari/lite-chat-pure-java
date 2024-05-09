@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class DependencyConstructorTest {
     @BeforeEach
     void createInstance() {
         dependencyInjector = new DependencyInjector(new HashMap<>());
-        dependencyConstructor = new DependencyConstructor(dependencyInjector);
+        dependencyConstructor = new DependencyConstructor(dependencyInjector, new ArrayList<>());
     }
 
     @Test
