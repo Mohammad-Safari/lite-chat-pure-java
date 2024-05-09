@@ -25,6 +25,7 @@ public class ContextProvider {
             throw new IllegalStateException("this context has been added and still exists!");
         }
         contextInjectors.put(context, di);
+        contextConstructors.put(context, dc);
     }
 
     public void removeContext(Context context) {
