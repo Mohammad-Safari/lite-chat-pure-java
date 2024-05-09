@@ -2,6 +2,7 @@ package sfri.mhmd.utils.server;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 
@@ -48,6 +49,7 @@ public class LiteChatFrontController {
         var handlerOptional = handlers.stream()
                 .filter((h) -> path.matches(h.getPath()))
                 .filter((h) -> h.matches(exchange))
+                .filter(Objects::nonNull)
                 .findFirst();
         return handlerOptional;
     }

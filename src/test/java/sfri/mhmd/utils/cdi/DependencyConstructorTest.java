@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import sfri.mhmd.utils.cdi.anno.Inject;
+import sfri.mhmd.utils.cdi.anno.Provider;
 
 @ExtendWith(MockitoExtension.class)
 public class DependencyConstructorTest {
@@ -35,6 +39,11 @@ public class DependencyConstructorTest {
         @Inject
         public DummyClass(DummyDependencyClass dep) {
             this.dep = dep;
+        }
+
+        @Provider
+        public DummyDependencyClass provider() {
+            return new DummyDependencyClass();
         }
     }
 
@@ -96,5 +105,28 @@ public class DependencyConstructorTest {
         assertNotNull(owner.dummies.getFirst());
         assertNull(owner.dummies.getFirst().dep);
         assertEquals(owner.dummies.size(), 2);
+    }
+
+    @Test
+    void testConstructWithProvider() {
+        var providerObjectForDummyDep = spy(new DummyClass());
+        dependencyConstructor.addProvider(providerObjectForDummyDep);
+        var dummyObj = dependencyConstructor.constructShallow(DummyDependencyClass.class);
+        assertNotNull(dummyObj);
+        verify(providerObjectForDummyDep, times(1)).provider();
+
+    }
+
+    @Test
+    void testConstructMixedProviderAndConstructor() {
+        var providerObjectForDummyDep = spy(new DummyClass()); // just as a provider object
+        dependencyConstructor.addProvider(providerObjectForDummyDep);
+        var owner = dependencyConstructor.constructDeep(DummyOwner.class);
+        assertNotNull(owner.dummies);
+        assertNotNull(owner.dummies.getFirst());
+        assertNotNull(owner.dummies.getFirst().dep);
+        assertEquals(owner.dummies.size(), 1);
+        verify(providerObjectForDummyDep, times(1)).provider();
+
     }
 }

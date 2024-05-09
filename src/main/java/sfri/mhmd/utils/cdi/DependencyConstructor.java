@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
 import sfri.mhmd.utils.cdi.anno.Inject;
@@ -36,6 +37,7 @@ public class DependencyConstructor implements BaseConstructor {
     public <T> T construct(Class<T> dependencyClass, ParameterProvider dependencyProvider) {
         T instance = providerObjects.stream()
                 .map(obj -> fromProviderMethods(obj, dependencyClass, dependencyProvider))
+                .filter(Objects::nonNull)
                 .findFirst().orElse(null);
         return instance == null ? fromAnnotatedConstructors(dependencyClass, dependencyProvider) : instance;
     }
