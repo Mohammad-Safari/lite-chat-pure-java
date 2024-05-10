@@ -6,10 +6,16 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.google.gson.Gson;
+import com.sun.net.httpserver.HttpExchange;
+
 import sfri.mhmd.utils.cdi.Context;
 import sfri.mhmd.utils.cdi.ContextProvider;
+import sfri.mhmd.utils.cdi.anno.Provider;
 import sfri.mhmd.utils.cdi.dependency.DependencyConstructor;
 import sfri.mhmd.utils.cdi.dependency.DependencyInjector;
+import sfri.mhmd.utils.cdi.dependency.ParameterProviders;
+import sfri.mhmd.utils.server.LiteChatContextAwareController;
 import sfri.mhmd.utils.server.LiteChatController;
 import sfri.mhmd.utils.server.LiteChatFrontController;
 import sfri.mhmd.utils.server.LiteChatResourceResolver;
@@ -28,15 +34,29 @@ public class Application {
                     var body = "Hello World".getBytes();
                     x.sendResponseHeaders(200, body.length);
                     x.getResponseBody().write(body);
-                }, new LiteChatResourceResolver(".*")));
+                },
+                new LiteChatResourceResolver(".*(\\.).*"),
+                new LiteChatContextAwareController("/chats",
+                        (context) -> {
+                            var contextProvider = ContextProvider.getContextProvider();
+                            var injector = contextProvider.getContextInjector(context);
+                            var cosntructor = contextProvider.getContextConstrucor(context);
+                            var gson = cosntructor.construct(Gson.class,
+                                    ParameterProviders.shallowParameterProvider(injector, cosntructor));
+                            var x = injector.get(HttpExchange.class);
+                            var response = gson.toJson(List.of("chat1", "chat2")).getBytes();
+                            x.sendResponseHeaders(200, response.length);
+                            x.getResponseBody().write(response);
+                        })));
 
         startApp(di, dc);
     }
 
     private static void initContext() {
-        di = new DependencyInjector(new ConcurrentHashMap<>());
-        dc = new DependencyConstructor(di, new CopyOnWriteArrayList<>());
-        ContextProvider.setContextProvider(new ContextProvider(new ConcurrentHashMap<>(), new ConcurrentHashMap<>()));
+        di = provideInjector();
+        dc = provideCosntructor(di);
+        dc.addProvider(new Application());
+        ContextProvider.setContextProvider(provideContext());
         ContextProvider.getContextProvider().addContext(new Context(Thread.currentThread().getName()), di, dc);
         ContextProvider.getContextProvider().setRootContextInjector(di);
         ContextProvider.getContextProvider().setRootContextConstructor(dc);
@@ -59,5 +79,19 @@ public class Application {
             ContextProvider.getContextProvider().clearAllContexts();
             di.get(LiteChatFrontController.class).stop();
         }
+    }
+
+    private static ContextProvider provideContext() {
+        return new ContextProvider(new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+    }
+
+    @Provider(clazz = "sfri.mhmd.utils.cdi.BaseInjector")
+    public static DependencyInjector provideInjector() {
+        return new DependencyInjector(new ConcurrentHashMap<>());
+    }
+
+    @Provider(clazz = "sfri.mhmd.utils.cdi.BaseConstructor")
+    public static DependencyConstructor provideCosntructor(DependencyInjector di) {
+        return new DependencyConstructor(di, new CopyOnWriteArrayList<>());
     }
 }
