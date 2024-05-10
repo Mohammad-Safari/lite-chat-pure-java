@@ -45,7 +45,7 @@ public class ContextProvider {
         return contextInjectors.get(context);
     }
 
-    public BaseConstructor getContextConstrucors(Context context) {
+    public BaseConstructor getContextConstrucor(Context context) {
         if (!contextConstructors.containsKey(context)) {
             throw new IllegalStateException("the context has no constructors!");
         }

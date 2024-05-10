@@ -8,8 +8,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import sfri.mhmd.utils.cdi.Context;
 import sfri.mhmd.utils.cdi.ContextProvider;
-import sfri.mhmd.utils.cdi.DependencyConstructor;
-import sfri.mhmd.utils.cdi.DependencyInjector;
+import sfri.mhmd.utils.cdi.dependency.DependencyConstructor;
+import sfri.mhmd.utils.cdi.dependency.DependencyInjector;
 import sfri.mhmd.utils.server.LiteChatController;
 import sfri.mhmd.utils.server.LiteChatFrontController;
 import sfri.mhmd.utils.server.LiteChatResourceResolver;

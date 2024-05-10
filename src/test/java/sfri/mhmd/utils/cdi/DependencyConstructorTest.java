@@ -19,6 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import sfri.mhmd.utils.cdi.anno.Inject;
 import sfri.mhmd.utils.cdi.anno.Provider;
+import sfri.mhmd.utils.cdi.dependency.DependencyConstructor;
+import sfri.mhmd.utils.cdi.dependency.DependencyInjector;
 
 @ExtendWith(MockitoExtension.class)
 public class DependencyConstructorTest {

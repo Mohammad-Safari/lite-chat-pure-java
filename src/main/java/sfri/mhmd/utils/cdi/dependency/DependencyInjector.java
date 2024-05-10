@@ -1,4 +1,4 @@
-package sfri.mhmd.utils.cdi;
+package sfri.mhmd.utils.cdi.dependency;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
+import sfri.mhmd.utils.cdi.BaseInjector;
+import sfri.mhmd.utils.cdi.ParameterProvider;
 import sfri.mhmd.utils.cdi.anno.Inject;
 import sfri.mhmd.utils.cdi.anno.Optional;
 

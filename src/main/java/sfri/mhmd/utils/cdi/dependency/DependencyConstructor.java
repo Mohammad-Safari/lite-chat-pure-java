@@ -1,4 +1,4 @@
-package sfri.mhmd.utils.cdi;
+package sfri.mhmd.utils.cdi.dependency;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
+import sfri.mhmd.utils.cdi.BaseConstructor;
+import sfri.mhmd.utils.cdi.BaseInjector;
+import sfri.mhmd.utils.cdi.ParameterProvider;
 import sfri.mhmd.utils.cdi.anno.Inject;
 import sfri.mhmd.utils.cdi.anno.Optional;
 import sfri.mhmd.utils.cdi.anno.Provider;
@@ -15,7 +18,7 @@ import sfri.mhmd.utils.cdi.anno.Provider;
 @RequiredArgsConstructor
 @SuppressWarnings("unchecked")
 public class DependencyConstructor implements BaseConstructor {
-    private final BaseInjector dependencyInjectors;
+    private final BaseInjector dependencyInjector;
     private final List<Object> providerObjects;
 
     @Override
@@ -51,7 +54,7 @@ public class DependencyConstructor implements BaseConstructor {
      * @return
      */
     public <T> T constructDefective(Class<T> dependencyClass) {
-        ParameterProvider dependencyProvider = ParameterProviders.nullParameterProvider(dependencyInjectors, this);
+        ParameterProvider dependencyProvider = ParameterProviders.nullParameterProvider(dependencyInjector, this);
         return construct(dependencyClass, dependencyProvider);
     }
 
@@ -64,7 +67,7 @@ public class DependencyConstructor implements BaseConstructor {
      * @return
      */
     public <T> T constructShallow(Class<T> dependencyClass) {
-        ParameterProvider dependencyProvider = ParameterProviders.shallowParameterProvider(dependencyInjectors, this);
+        ParameterProvider dependencyProvider = ParameterProviders.shallowParameterProvider(dependencyInjector, this);
         return construct(dependencyClass, dependencyProvider);
     }
 
@@ -77,7 +80,7 @@ public class DependencyConstructor implements BaseConstructor {
      * @return
      */
     public <T> T constructDeep(Class<T> dependencyClass) {
-        ParameterProvider dependencyProvider = ParameterProviders.deepParameterProvider(dependencyInjectors, this);
+        ParameterProvider dependencyProvider = ParameterProviders.deepParameterProvider(dependencyInjector, this);
         return construct(dependencyClass, dependencyProvider);
     }
 
@@ -99,7 +102,10 @@ public class DependencyConstructor implements BaseConstructor {
             if (!provider.isAnnotationPresent(Provider.class)) {
                 continue;
             }
-            if (provider.getReturnType() != dependencyClass) {
+            var explicitClasses = Arrays.stream(provider.getAnnotationsByType(Provider.class))
+                    .map(Provider::clazz).filter(s -> !s.equals(""))
+                    .map(this::ClassForNameOrNull).filter(Objects::nonNull).toList();
+            if (provider.getReturnType() != dependencyClass && !explicitClasses.contains(dependencyClass)) {
                 continue;
             }
             Parameter[] requiredParams = provider.getParameters();
@@ -115,6 +121,14 @@ public class DependencyConstructor implements BaseConstructor {
             }
         }
         return null;
+    }
+
+    private Class<?> ClassForNameOrNull(String clazz) {
+        try {
+            return Class.forName(clazz);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
     }
 
     /**

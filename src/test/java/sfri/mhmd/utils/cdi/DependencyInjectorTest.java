@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import sfri.mhmd.utils.cdi.anno.Inject;
+import sfri.mhmd.utils.cdi.dependency.DependencyInjector;
 
 public class DependencyInjectorTest {
 
