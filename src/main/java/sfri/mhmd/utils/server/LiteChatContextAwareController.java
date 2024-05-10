@@ -16,6 +16,8 @@ import sfri.mhmd.utils.cdi.anno.Provider;
 public class LiteChatContextAwareController implements LiteChatController {
     @Getter
     private final String path;
+    @Getter
+    private final String method;
     private final ContextAwareRunnable contextAwareRunnable;
 
     public static Context getContext(HttpExchange x) {
@@ -44,7 +46,7 @@ public class LiteChatContextAwareController implements LiteChatController {
 
     @Override
     public boolean matches(HttpExchange x) {
-        return LiteChatController.super.matches(x);
+        return method.toLowerCase().equals(x.getRequestMethod().toLowerCase());
     }
 
     @Provider

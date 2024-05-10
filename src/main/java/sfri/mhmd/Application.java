@@ -30,13 +30,14 @@ public class Application {
 
         di.set(ServerConfiguration.class, new ServerConfiguration("/", new InetSocketAddress(8080)));
         di.setAll(LiteChatController.class, List.<LiteChatController>of(
+                // matches all methods
                 (x) -> {
                     var body = "Hello World".getBytes();
                     x.sendResponseHeaders(200, body.length);
                     x.getResponseBody().write(body);
                 },
                 new LiteChatResourceResolver(".*(\\.).*"),
-                new LiteChatContextAwareController("/chats",
+                new LiteChatContextAwareController("/chats", "get",
                         (context) -> {
                             var injector = contextProvider.getContextInjector(context);
                             var constructor = contextProvider.getContextConstrucor(context);
