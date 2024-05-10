@@ -11,7 +11,7 @@ import sfri.mhmd.utils.cdi.BaseInjector;
 import sfri.mhmd.utils.cdi.ParameterProvider;
 
 @SuppressWarnings("unchecked")
-public class ParameterProviders {
+class ParameterProviders {
     /**
      * field Type is strictly the class field type which could be actually an array,
      * collection or the same as dependency Type

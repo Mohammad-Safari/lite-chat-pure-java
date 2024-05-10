@@ -9,12 +9,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 
+import sfri.mhmd.utils.cdi.BaseConstructor;
+import sfri.mhmd.utils.cdi.BaseInjector;
 import sfri.mhmd.utils.cdi.Context;
 import sfri.mhmd.utils.cdi.ContextProvider;
 import sfri.mhmd.utils.cdi.anno.Provider;
 import sfri.mhmd.utils.cdi.dependency.DependencyConstructor;
 import sfri.mhmd.utils.cdi.dependency.DependencyInjector;
-import sfri.mhmd.utils.cdi.dependency.ParameterProviders;
 import sfri.mhmd.utils.server.LiteChatContextAwareController;
 import sfri.mhmd.utils.server.LiteChatController;
 import sfri.mhmd.utils.server.LiteChatFrontController;
@@ -22,11 +23,10 @@ import sfri.mhmd.utils.server.LiteChatResourceResolver;
 import sfri.mhmd.utils.server.ServerConfiguration;
 
 public class Application {
-    private static DependencyInjector di;
-    private static DependencyConstructor dc;
-
     public static void main(String[] args) throws IOException {
-        initContext();
+        final var contextProvider = initContext();
+        final var di = contextProvider.getRootContextInjector();
+        final var dc = contextProvider.getRootContextConstructor();
 
         di.set(ServerConfiguration.class, new ServerConfiguration("/", new InetSocketAddress(8080)));
         di.setAll(LiteChatController.class, List.<LiteChatController>of(
@@ -38,11 +38,9 @@ public class Application {
                 new LiteChatResourceResolver(".*(\\.).*"),
                 new LiteChatContextAwareController("/chats",
                         (context) -> {
-                            var contextProvider = ContextProvider.getContextProvider();
                             var injector = contextProvider.getContextInjector(context);
-                            var cosntructor = contextProvider.getContextConstrucor(context);
-                            var gson = cosntructor.construct(Gson.class,
-                                    ParameterProviders.shallowParameterProvider(injector, cosntructor));
+                            var constructor = contextProvider.getContextConstrucor(context);
+                            var gson = DependencyConstructor.constructShallow(injector, constructor, Gson.class);
                             var x = injector.get(HttpExchange.class);
                             var response = gson.toJson(List.of("chat1", "chat2")).getBytes();
                             x.sendResponseHeaders(200, response.length);
@@ -52,20 +50,22 @@ public class Application {
         startApp(di, dc);
     }
 
-    private static void initContext() {
-        di = provideInjector();
-        dc = provideCosntructor(di);
+    private static ContextProvider initContext() {
+        var context = provideContext();
+        var di = provideInjector();
+        var dc = provideConstructor(di);
         dc.addProvider(new Application());
-        ContextProvider.setContextProvider(provideContext());
-        ContextProvider.getContextProvider().addContext(new Context(Thread.currentThread().getName()), di, dc);
-        ContextProvider.getContextProvider().setRootContextInjector(di);
-        ContextProvider.getContextProvider().setRootContextConstructor(dc);
+        ContextProvider.setContextProvider(context);
+        context.addContext(new Context(Thread.currentThread().getName()), di, dc);
+        context.setRootContextInjector(di);
+        context.setRootContextConstructor(dc);
+        return context;
     }
 
-    private static void startApp(DependencyInjector di, DependencyConstructor dc) {
+    private static void startApp(BaseInjector di, BaseConstructor dc) {
         var thread = new Thread(() -> {
             try {
-                var serverInstance = dc.constructDeep(LiteChatFrontController.class);
+                var serverInstance = DependencyConstructor.constructDeep(di, dc, LiteChatFrontController.class);
                 di.set(LiteChatFrontController.class, serverInstance);
                 serverInstance.start();
             } catch (Exception e) {
@@ -91,7 +91,7 @@ public class Application {
     }
 
     @Provider(clazz = "sfri.mhmd.utils.cdi.BaseConstructor")
-    public static DependencyConstructor provideCosntructor(DependencyInjector di) {
+    public static DependencyConstructor provideConstructor(DependencyInjector di) {
         return new DependencyConstructor(di, new CopyOnWriteArrayList<>());
     }
 }

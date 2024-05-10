@@ -53,9 +53,9 @@ public class DependencyConstructor implements BaseConstructor {
      * @param dependencyClass
      * @return
      */
-    public <T> T constructDefective(Class<T> dependencyClass) {
-        ParameterProvider dependencyProvider = ParameterProviders.nullParameterProvider(dependencyInjector, this);
-        return construct(dependencyClass, dependencyProvider);
+    public static <T> T constructDefective(BaseConstructor bc, Class<T> dependencyClass) {
+        ParameterProvider dependencyProvider = ParameterProviders.nullParameterProvider(null, bc);
+        return bc.construct(dependencyClass, dependencyProvider);
     }
 
     /**
@@ -66,9 +66,9 @@ public class DependencyConstructor implements BaseConstructor {
      * @param dependencyClass
      * @return
      */
-    public <T> T constructShallow(Class<T> dependencyClass) {
-        ParameterProvider dependencyProvider = ParameterProviders.shallowParameterProvider(dependencyInjector, this);
-        return construct(dependencyClass, dependencyProvider);
+    public static <T> T constructShallow(BaseInjector bi, BaseConstructor bc, Class<T> dependencyClass) {
+        ParameterProvider dependencyProvider = ParameterProviders.shallowParameterProvider(bi, bc);
+        return bc.construct(dependencyClass, dependencyProvider);
     }
 
     /**
@@ -79,9 +79,9 @@ public class DependencyConstructor implements BaseConstructor {
      * @param dependencyClass
      * @return
      */
-    public <T> T constructDeep(Class<T> dependencyClass) {
-        ParameterProvider dependencyProvider = ParameterProviders.deepParameterProvider(dependencyInjector, this);
-        return construct(dependencyClass, dependencyProvider);
+    public static <T> T constructDeep(BaseInjector bi, BaseConstructor bc, Class<T> dependencyClass) {
+        ParameterProvider dependencyProvider = ParameterProviders.deepParameterProvider(bi, bc);
+        return bc.construct(dependencyClass, dependencyProvider);
     }
 
     /**
