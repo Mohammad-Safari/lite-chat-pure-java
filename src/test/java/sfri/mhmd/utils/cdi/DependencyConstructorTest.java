@@ -29,10 +29,10 @@ public class DependencyConstructorTest {
      * note inner non-static classes have extra hidden param in their constructors
      */
 
-    private static class DummyDependencyClass {
+    protected static class DummyDependencyClass {
     }
 
-    private static class DummyClass {
+    protected static class DummyClass {
         private DummyDependencyClass dep;
 
         public DummyClass() {
@@ -49,10 +49,10 @@ public class DependencyConstructorTest {
         }
     }
 
-    private static class AnotherDummyClass extends DummyClass {
+    protected static class AnotherDummyClass extends DummyClass {
     }
 
-    private static class DummyOwner {
+    protected static class DummyOwner {
         private List<DummyClass> dummies;
 
         @Inject
@@ -67,7 +67,7 @@ public class DependencyConstructorTest {
     @BeforeEach
     void createInstance() {
         dependencyInjector = new DependencyInjector(new HashMap<>());
-        dependencyConstructor = new DependencyConstructor(dependencyInjector, new ArrayList<>());
+        dependencyConstructor = new DependencyConstructor(new ArrayList<>());
     }
 
     @Test
@@ -83,7 +83,7 @@ public class DependencyConstructorTest {
     void testConstructDeep() {
         var dep = new DummyDependencyClass();
         dependencyInjector.set(DummyDependencyClass.class, dep, false);
-        var owner = dependencyConstructor.constructDeep(DummyOwner.class);
+        var owner = DependencyConstructor.constructDeep(dependencyInjector, dependencyConstructor, DummyOwner.class);
         assertNotNull(owner.dummies);
         assertNotNull(owner.dummies.getFirst());
         assertNotNull(owner.dummies.getFirst().dep);
@@ -92,7 +92,7 @@ public class DependencyConstructorTest {
 
     @Test
     void testConstructDefective() {
-        var owner = dependencyConstructor.constructDefective(DummyOwner.class);
+        var owner = DependencyConstructor.constructDefective(dependencyConstructor, DummyOwner.class);
         assertNull(owner.dummies);
     }
 
@@ -102,7 +102,7 @@ public class DependencyConstructorTest {
         var anotherImpl = new AnotherDummyClass();
         dependencyInjector.set(DummyClass.class, impl, true);
         dependencyInjector.set(DummyClass.class, anotherImpl, true);
-        var owner = dependencyConstructor.constructShallow(DummyOwner.class);
+        var owner = DependencyConstructor.constructShallow(dependencyInjector, dependencyConstructor, DummyOwner.class);
         assertNotNull(owner.dummies);
         assertNotNull(owner.dummies.getFirst());
         assertNull(owner.dummies.getFirst().dep);
@@ -113,7 +113,8 @@ public class DependencyConstructorTest {
     void testConstructWithProvider() {
         var providerObjectForDummyDep = spy(new DummyClass());
         dependencyConstructor.addProvider(providerObjectForDummyDep);
-        var dummyObj = dependencyConstructor.constructShallow(DummyDependencyClass.class);
+        var dummyObj = DependencyConstructor.constructShallow(dependencyInjector, dependencyConstructor,
+                DummyDependencyClass.class);
         assertNotNull(dummyObj);
         verify(providerObjectForDummyDep, times(1)).provider();
 
@@ -123,7 +124,7 @@ public class DependencyConstructorTest {
     void testConstructMixedProviderAndConstructor() {
         var providerObjectForDummyDep = spy(new DummyClass()); // just as a provider object
         dependencyConstructor.addProvider(providerObjectForDummyDep);
-        var owner = dependencyConstructor.constructDeep(DummyOwner.class);
+        var owner = DependencyConstructor.constructDeep(dependencyInjector, dependencyConstructor, DummyOwner.class);
         assertNotNull(owner.dummies);
         assertNotNull(owner.dummies.getFirst());
         assertNotNull(owner.dummies.getFirst().dep);

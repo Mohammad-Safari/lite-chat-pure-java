@@ -93,6 +93,6 @@ public class Application {
 
     @Provider(clazz = "sfri.mhmd.utils.cdi.BaseConstructor")
     public static DependencyConstructor provideConstructor(DependencyInjector di) {
-        return new DependencyConstructor(di, new CopyOnWriteArrayList<>());
+        return new DependencyConstructor(new CopyOnWriteArrayList<>());
     }
 }

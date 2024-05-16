@@ -18,7 +18,6 @@ import sfri.mhmd.utils.cdi.anno.Provider;
 @RequiredArgsConstructor
 @SuppressWarnings("unchecked")
 public class DependencyConstructor implements BaseConstructor {
-    private final BaseInjector dependencyInjector;
     private final List<Object> providerObjects;
 
     @Override
